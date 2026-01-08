@@ -222,7 +222,7 @@ input[type="text"]:focus {
     border-radius: 50px;
     margin-top: auto;
     /* Push to bottom */
-    margin-bottom: 20px;
+    margin-bottom: 10%;
     cursor: pointer;
     transition: 0.1s;
 }
@@ -417,6 +417,7 @@ input[type="text"]:focus {
 /* Stars */
 .star-filled {
     color: #FBC02D;
+    font-size: 0.9rem
 }
 
 .star-empty {

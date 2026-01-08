@@ -233,37 +233,46 @@ function renderGameScreen() {
 }
 
 function togglePlayerSelection(index) {
-    state.players[index].selected = !state.players[index].selected;
+    const player = state.players[index];
+    
+    // Toggle selection
+    player.selected = !player.selected;
+
+    // Immediate score update logic
+    if (state.currentStars > 0) {
+        if (player.selected) {
+            // Added
+            player.score += state.currentStars;
+        } else {
+            // Removed (undo)
+            player.score -= state.currentStars;
+            // Prevent negative score (optional safety, though logic shouldn't allow it if flow is correct)
+            if (player.score < 0) player.score = 0;
+        }
+    }
+
     renderGameScreen();
 }
 
 function handleTopicTap() {
     if (state.isRolling) return;
 
-    // 1. Helper: Add score to selected players using CURRENT topic stars (if any)
-    const selectedPlayers = state.players.filter(p => p.selected);
-    if (selectedPlayers.length > 0 && state.currentStars > 0) {
-        // Add score
-        let winnerFound = false;
-        state.players.forEach(p => {
-            if (p.selected) {
-                p.score += state.currentStars;
-                p.selected = false; // Deselect
-
-                if (p.score >= state.targetScore) {
-                    winnerFound = true;
-                }
-            }
-        });
-
-        if (winnerFound) {
-            saveState(); // Save state before reflesh
-            showResult();
-            return;
+    // Check if any player has reached the target score
+    let winnerFound = false;
+    state.players.forEach(p => {
+        if (p.score >= state.targetScore) {
+            winnerFound = true;
         }
-    } else if (selectedPlayers.length > 0 && state.currentStars === 0) {
-        state.players.forEach(p => p.selected = false);
+    });
+
+    if (winnerFound) {
+        saveState();
+        showResult();
+        return;
     }
+
+    // Reset selection for next round
+    state.players.forEach(p => p.selected = false);
 
     // Rerender to show score updates immediately
     renderGameScreen();
