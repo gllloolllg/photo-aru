@@ -284,11 +284,11 @@ function performTopicLottery() {
         const rand = state.topics[Math.floor(Math.random() * state.topics.length)];
         gameElements.topicText.textContent = rand.text;
         count++;
-        if (count > 10) {
+        if (count > 40) {
             clearInterval(interval);
             finalizeTopic();
         }
-    }, 100);
+    }, 50);
 }
 
 function finalizeTopic() {
