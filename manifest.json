@@ -1,6 +1,6 @@
 {
-    "name": "お題と写真",
-    "short_name": "お題と写真",
+    "name": "こんな写真ある？",
+    "short_name": "こんな写真ある？",
     "start_url": "./index.html",
     "display": "standalone",
     "background_color": "#FFF3E0",
