@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Topic & Photo Game</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Potta+One&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="お題と写真">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <meta name="theme-color" content="#FF9800">
+</head>
+
+<body>
+
+    <div id="app">
+        <!-- Entry Screen -->
+        <section id="entry-screen" class="screen active">
+            <h1 class="logo">こんな写真ある？</h1>
+
+            <div class="card">
+                <div class="input-group">
+                    <input type="text" id="player-name-input" placeholder="名前を入力" maxlength="10">
+                    <button id="add-player-btn" class="btn-primary">＋</button>
+                </div>
+                <ul id="player-list" class="player-list-entry">
+                    <!-- Players will be added here -->
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>ゴールの得点</h2>
+                <div class="score-setter">
+                    <button class="adjust-btn" onclick="adjustTargetScore(-1)">-</button>
+                    <div class="star-display">
+                        <span class="star-icon">⭐</span>
+                        <span id="target-score-display">5</span>
+                    </div>
+                    <button class="adjust-btn" onclick="adjustTargetScore(1)">+</button>
+                </div>
+            </div>
+
+
+            <button id="start-game-btn" class="btn-large" disabled>ゲームスタート</button>
+        </section>
+
+        <!-- Game Screen -->
+        <section id="game-screen" class="screen hidden">
+            <div class="topic-area" id="topic-area">
+                <div class="topic-content">
+                    <div id="topic-text" class="topic-text">タップしてお題抽選</div>
+                    <div id="topic-stars" class="topic-stars">
+                        <!-- Stars will appear here -->
+                    </div>
+                </div>
+                <div class="instruction">タップしてお題を決定</div>
+            </div>
+
+            <div class="score-area">
+                <div class="score-header">
+                    <button id="new-game-mini-btn" class="btn-small">ニューゲーム</button>
+                </div>
+                <div id="game-player-list" class="game-player-list">
+                    <!-- Game players list -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Result Screen -->
+        <section id="result-screen" class="screen hidden">
+            <h1 class="result-title">結果発表！</h1>
+            <div id="result-list" class="result-list">
+                <!-- Ranking -->
+            </div>
+            <button id="back-to-title-btn" class="btn-large">タイトルへ戻る</button>
+        </section>
+
+        <!-- Custom Modal -->
+        <div id="confirm-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3>ゲームを終了しますか？</h3>
+                <p>現在のデータは削除されます。</p>
+                <div class="modal-actions">
+                    <button id="modal-cancel-btn" class="btn-small">キャンセル</button>
+                    <button id="modal-confirm-btn" class="btn-primary">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
