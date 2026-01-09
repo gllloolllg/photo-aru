@@ -3,7 +3,7 @@ const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTqYkl2GspjLw
 
 const state = {
     players: [], // { name: string, score: number, selected: boolean }
-    targetScore: 5,
+    targetScore: 8,
     currentStars: 0,
     isRolling: false,
     usedTopics: [], // Indices of used topics
@@ -98,7 +98,7 @@ function setupEventListeners() {
 
 function adjustTargetScore(delta) {
     let newScore = state.targetScore + delta;
-    if (newScore < 3) newScore = 3;
+    if (newScore < 1) newScore = 1;
     if (newScore > 15) newScore = 15;
     state.targetScore = newScore;
     saveState();
