@@ -1,7 +1,5 @@
 const CACHE_NAME = 'topic-photo-v1';
 const ASSETS = [
-    '/',
-    '/index.html',
     '/style.css',
     '/script.js',
     '/manifest.json',
@@ -21,9 +19,6 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('fetch', (event) => {
     if (event.request.mode === 'navigate') {
-        event.respondWith(
-            caches.match('/index.html')
-        );
         return;
     }
 
