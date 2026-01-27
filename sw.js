@@ -1,13 +1,13 @@
 const CACHE_NAME = 'topic-photo-v1';
 const ASSETS = [
-    './',
-    './index.html',
-    './style.css',
-    './script.js',
-    './manifest.json',
-    './apple-touch-icon.png',
-    './icon-192.png',
-    './icon-512.png',
+    '/',
+    '/index.html',
+    '/style.css',
+    '/script.js',
+    '/manifest.json',
+    '/apple-touch-icon.png',
+    '/icon-192.png',
+    '/icon-512.png',
     'https://fonts.googleapis.com/css2?family=Potta+One&display=swap',
     'https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js'
 ];
@@ -20,6 +20,13 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            caches.match('/index.html')
+        );
+        return;
+    }
+
     event.respondWith(
         caches.match(event.request)
             .then((response) => response || fetch(event.request))
