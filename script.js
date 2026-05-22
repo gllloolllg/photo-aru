@@ -1,5 +1,5 @@
 // Game State
-const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTqYkl2GspjLwFlf7lcSBgYtxD5jJy74Fx35TqyKlxuC5o_FS_XJXekFonv2XpCC7RAtZiqp-UlEkWx/pub?gid=0&single=true&output=csv'; // ここにCSVのURLを貼ってください
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyFFGI9Z5IfB_h5a3wvjOh4pnt96UkgKqVrvD0ONT3VYhBVg9NQLGUkJmpaZDiS1TBH/exec'; // ここにスプレッドシートのCSV公開URLまたはGASのウェブアプリURLを貼ってください
 
 const state = {
     players: [], // { name: string, score: number, selected: boolean }
@@ -98,7 +98,7 @@ function setupEventListeners() {
 
 function adjustTargetScore(delta) {
     let newScore = state.targetScore + delta;
-    if (newScore < 1) newScore = 1;
+    if (newScore < 3) newScore = 3;
     if (newScore > 15) newScore = 15;
     state.targetScore = newScore;
     saveState();
@@ -147,36 +147,57 @@ async function loadTopicsFromSheet() {
     if (!SHEET_URL) return;
 
     try {
-        // Try a different CORS Proxy (corsproxy.io) as AllOrigins might be unstable or blocked.
-        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(SHEET_URL);
-        const response = await fetch(proxyUrl);
-        if (!response.ok) throw new Error("Network response was not ok");
-        const text = await response.text();
-
-        const rows = text.split('\n').map(row => row.trim()).filter(row => row);
         const newTopics = [];
 
-        rows.forEach((row, index) => {
-            const parts = row.split(',');
-            if (parts.length >= 1) {
-                const topicText = parts[0].trim();
-                let topicStars = 1;
-                if (parts.length >= 2) {
-                    const s = parseInt(parts[1].trim());
-                    if (!isNaN(s)) topicStars = Math.max(1, Math.min(3, s));
-                }
+        // 1. Google Apps ScriptのウェブアプリURLであるかチェック (script.google.com を含む場合)
+        if (SHEET_URL.includes('script.google.com')) {
+            const response = await fetch(SHEET_URL, { redirect: 'follow' });
+            if (!response.ok) throw new Error("GAS response was not ok");
+            const data = await response.json();
 
-                if (topicText) {
-                    newTopics.push({ id: index, text: topicText, stars: topicStars });
-                }
+            if (Array.isArray(data)) {
+                data.forEach((item, index) => {
+                    const topicText = item.text || item.topic;
+                    const stars = parseInt(item.stars || item.score || 1);
+                    if (topicText) {
+                        newTopics.push({
+                            id: index,
+                            text: String(topicText).trim(),
+                            stars: isNaN(stars) ? 1 : Math.max(1, Math.min(3, stars))
+                        });
+                    }
+                });
             }
-        });
+        } else {
+            // 2. 従来のCSV公開URLとしてフェッチ (フォールバック)
+            const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(SHEET_URL);
+            const response = await fetch(proxyUrl);
+            if (!response.ok) throw new Error("CSV response was not ok");
+            const text = await response.text();
 
-        if (newTopics.length >= 3) {
-            // Update state
+            const rows = text.split('\n').map(row => row.trim()).filter(row => row);
+            rows.forEach((row, index) => {
+                const parts = row.split(',');
+                if (parts.length >= 1) {
+                    const topicText = parts[0].trim();
+                    let topicStars = 1;
+                    if (parts.length >= 2) {
+                        const s = parseInt(parts[1].trim());
+                        if (!isNaN(s)) topicStars = Math.max(1, Math.min(3, s));
+                    }
+
+                    // ヘッダー行("お題"など)を除外
+                    if (topicText && topicText !== "お題" && topicText !== "topic") {
+                        newTopics.push({ id: index, text: topicText, stars: topicStars });
+                    }
+                }
+            });
+        }
+
+        if (newTopics.length > 0) {
+            // ステートの更新
             state.topics = newTopics;
-            // state.sheetUrl is deprecated/unused now
-            state.usedTopics = []; // Reset used
+            state.usedTopics = []; // 使用済みインデックスをリセットして再抽選可能にする
             saveState();
             console.log(`Loaded ${newTopics.length} topics from sheet.`);
         }
@@ -234,7 +255,7 @@ function renderGameScreen() {
 
 function togglePlayerSelection(index) {
     const player = state.players[index];
-    
+
     // Toggle selection
     player.selected = !player.selected;
 
@@ -399,6 +420,10 @@ function closeModal() {
 function confirmReset() {
     closeModal();
     resetGameData();
+    // NEW GAME時に最新のスプレッドシートデータを再読み込み
+    if (SHEET_URL) {
+        loadTopicsFromSheet();
+    }
     switchScreen('entry');
     renderEntryScreen();
 }
@@ -410,7 +435,7 @@ function resetToEntry() {
 
 function resetGameData() {
     state.players = [];
-    state.targetScore = 5;
+    state.targetScore = 8;
     state.currentStars = 0;
     state.usedTopics = [];
     state.isRolling = false;
@@ -432,7 +457,7 @@ function loadState() {
     if (saved) {
         const parsed = JSON.parse(saved);
         state.players = parsed.players || [];
-        state.targetScore = parsed.targetScore || 5;
+        state.targetScore = parsed.targetScore || 8;
         state.usedTopics = parsed.usedTopics || [];
         state.status = parsed.status || 'entry';
         state.currentTopicText = parsed.currentTopicText || '';
